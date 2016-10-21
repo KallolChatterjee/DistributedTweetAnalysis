@@ -35,6 +35,12 @@ app.get('/', function(req, res) {
                     "terms": {
                       "field": "sentiments"
                     }
+                },
+                "aggs2": {
+                    "terms": {
+                      "field": "hashtags",
+                      "size" : 10
+                    }
                 }
             }
           }
@@ -46,6 +52,9 @@ app.get('/', function(req, res) {
           // console.log(neutralValue);
           // console.log(negativeValue);
           // console.log(positiveValue);
+          /////////////////////////Top////////////////////////////////
+          var hashtagArray = resp.aggregations.aggs2.buckets;
+          /////////////////////////////////////////////////////////
           var sentimentDataArray = [];
           var title = ["sentiment", "value"];
           sentimentDataArray.push(title);
@@ -55,7 +64,8 @@ app.get('/', function(req, res) {
           sentimentDataArray.push(neutralObj);
           var negativeObj = ["Negative", negativeValue];
           sentimentDataArray.push(negativeObj);
-          app.render('index.html', { sentimentData: JSON.stringify(sentimentDataArray) },function(err, renderedData) {
+          app.render('index.html', { sentimentData: JSON.stringify(sentimentDataArray),
+          hashtags: JSON.stringify(hashtagArray) },function(err, renderedData) {
              res.send(renderedData);
          });
           }, function (err) {
