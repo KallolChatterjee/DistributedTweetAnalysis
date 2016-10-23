@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(bodyParser.json());
-http.createServer(app).listen(80);
+http.createServer(app).listen(8086);
 app.get('/', function(req, res) {
     var neutralValue;
     var negativeValue;
@@ -41,6 +41,18 @@ app.get('/', function(req, res) {
                       "field": "hashtags",
                       "size" : 10
                     }
+                },
+                "aggs3": {
+                    "terms": {
+                      "field": "mentions",
+                      "size" : 10
+                    }
+                },
+                "aggs4": {
+                        "date_histogram" : {
+                            "field" : "timestamp_ms",
+                            "interval" : "day"
+                        }
                 }
             }
           }
@@ -54,6 +66,8 @@ app.get('/', function(req, res) {
           // console.log(positiveValue);
           /////////////////////////Top////////////////////////////////
           var hashtagArray = resp.aggregations.aggs2.buckets;
+          var mentionsArray = resp.aggregations.aggs3.buckets;
+          var dailyDistributionbucket = resp.aggregations.aggs4.buckets;
           /////////////////////////////////////////////////////////
           var sentimentDataArray = [];
           var title = ["sentiment", "value"];
@@ -64,8 +78,12 @@ app.get('/', function(req, res) {
           sentimentDataArray.push(neutralObj);
           var negativeObj = ["Negative", negativeValue];
           sentimentDataArray.push(negativeObj);
-          app.render('index.html', { sentimentData: JSON.stringify(sentimentDataArray),
-          hashtags: JSON.stringify(hashtagArray) },function(err, renderedData) {
+          app.render('index.html', {
+            sentimentData: JSON.stringify(sentimentDataArray),
+            hashtags: JSON.stringify(hashtagArray),
+            mentions : JSON.stringify(mentionsArray),
+            dailyDistribution : JSON.stringify(dailyDistributionbucket)
+          },function(err, renderedData) {
              res.send(renderedData);
          });
           }, function (err) {

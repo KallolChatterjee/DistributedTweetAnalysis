@@ -8,18 +8,44 @@
 
 </head>
 <body>
+  <nav class="navbar navbar-inverse navbar-fixed-top">
   <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Distributed Tweet Analysis</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#">Home</a></li>
+
+    </ul>
+  </div>
+</nav>
+<br/><br/>
+<br/><br/>
+
+  <div class="container-fluid">
+      <div class="row">
+      <div class="col-sm-5">
+        <div id="sentimentPiechart" style="height: 500px; background-color : #A3C7C9"></div>
+      </div>
+      <div class="col-sm-5">
+        <div id="topHash" style="height: 500px;"></div>
+      </div>
+    </div>
+    <br/>
     <div class="row">
-    <div class="col-sm-5">
-      <div id="sentimentPiechart" style="height: 500px;"></div>
-    </div>
-    <div class="col-sm-5">
-      <div id="topHash" style="height: 500px;"></div>
+        <div class="col-sm-5">
+        <div id="topUserMentions" style="height: 500px; background-color : #A3C7C9"></div>
+        </div>
+        <div>
+        <div class="col-sm-2">
+          </div>
+        <div class="col-sm-5">
+          <div> <strong>Daily Tweets Distribution</strong></div><br/><br/>
+          <div id='dailyTweetschart' style='height: 450px; margin-left : 20px;'></div>
+        </div>
+        </div>
     </div>
   </div>
-  </div>
-
-
        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -31,7 +57,13 @@
   var hashTag = "<%=hashtags%>".replace(/&#34;/g,'"');
   var hashTagData = JSON.parse(hashTag);
   // console.log(hashTagData);
-  google.charts.load("current", {packages:["corechart", "bar"]});
+  var mentions = "<%=mentions%>".replace(/&#34;/g,'"');
+  var mentionsData = JSON.parse(mentions);
+  //
+  var dailyTweets = "<%=dailyDistribution%>".replace(/&#34;/g,'"');
+  var dailyTweetsData = JSON.parse(dailyTweets);
+  //
+  google.charts.load("current", {packages:["annotationchart", "corechart", "bar"]});
       google.charts.setOnLoadCallback(drawChart);
       function drawChart() {
         var data = google.visualization.arrayToDataTable(sentimentData);
@@ -70,8 +102,62 @@
        };
 
        var hashchart = new google.charts.Bar(document.getElementById('topHash'));
-       // Convert the Classic options to Material options.
        hashchart.draw(tophashTag, google.charts.Bar.convertOptions(tophashTagoptions));
+       /////////////////////////////////////////////////////////////////////////////////
+       var umArray = [["UserMentions", "Count"]];
+       for(var i=0; i< mentionsData.length; i++){
+         var newAr = [];
+         newAr.push(mentionsData[i].key);
+         newAr.push(mentionsData[i].doc_count);
+         umArray.push(newAr);
+       }
+       var mentionsdata = new google.visualization.arrayToDataTable(umArray);
+
+       var mentionsoptions = {
+         title: 'Top 10 user mention',
+         width: 900,
+         legend: { position: 'none' },
+         chart: { title: 'Top 10 user mention',
+                  subtitle: 'popularity by retweet' },
+         bars: 'horizontal', // Required for Material Bar Charts.
+         axes: {
+           x: {
+             0: { side: 'top', label: 'User Mention Count'} // Top x-axis.
+           }
+         },
+         bar: { groupWidth: "90%" },
+         colors: ["#A90E0E"]
+       };
+
+       var mentionschart = new google.charts.Bar(document.getElementById('topUserMentions'));
+       mentionschart.draw(mentionsdata, mentionsoptions);
+       /////////////////////////////////////////////////////////////////////////////////
+       var dailyTweetsAr = [];
+       for(var i=0; i< dailyTweetsData.length; i++){
+         var newAr = [];
+         console.log(dailyTweetsData[i].key);
+         newAr.push(new Date(dailyTweetsData[i].key));
+         newAr.push(dailyTweetsData[i].doc_count);
+         newAr.push("No of Tweets ");
+         newAr.push(dailyTweetsData[i].doc_count.toString());
+         dailyTweetsAr.push(newAr);
+       }
+       console.log(dailyTweetsAr);
+       var dailyTweetsdata = new google.visualization.DataTable();
+        dailyTweetsdata.addColumn('date', 'Date');
+        dailyTweetsdata.addColumn('number', 'Tweet Count');
+        dailyTweetsdata.addColumn('string', 'No of Tweets');
+        dailyTweetsdata.addColumn('string', 'TweetsCount');
+        dailyTweetsdata.addRows(dailyTweetsAr);
+        console.log("google data")
+        console.log(dailyTweetsdata);
+        var tweetschart = new google.visualization.AnnotationChart(document.getElementById('dailyTweetschart'));
+
+        var chartoptions = {
+          displayAnnotations: true
+        };
+
+        tweetschart.draw(dailyTweetsdata, chartoptions);
 
       }
 </script>
