@@ -64,13 +64,48 @@
       </div>
       </div>
     </div>
+    <br>
+    <div class="row">
+      <div class="col-sm-5">
+        <div id="map" style="height: 500px; background-color :white"></div>
+      </div>
+      <div class="col-sm-2">
+        </div>
+      <div class="col-sm-5">
+        </div>
+    </div>
   </div>
        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqcloud/1.0.4/jqcloud-1.0.4.js"></script>
-       <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyDTlf4PdknQp7TuI8oakozrbDTMCflpBMg&callback=loadMap"></script>
+
 <script>
+var map,heatmap;
+function loadMap(){
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 6,
+    center: {lat: -26.191, lng: 28.032},
+    mapTypeId: 'hybrid'
+  });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyDTlf4PdknQp7TuI8oakozrbDTMCflpBMg&callback=loadMap"></script>
+<script>
+var coordDetails = "<%=fullCoOrdinate%>".replace(/&#34;/g,'"');
+// console.log(sentimentDetails);
+var coordData = JSON.parse(coordDetails);
+var heatMapData = [];
+for(var i=0; i< coordData.length; i++){
+  var coOrd = coordData[i];
+  heatMapData.push(new google.maps.LatLng(coOrd[1], coOrd[0]));
+}
+console.log(coordDetails);
+heatmap = new google.maps.visualization.HeatmapLayer({
+    data: heatMapData,
+    map: map
+  });
+
   var sentimentDetails = "<%=sentimentData%>".replace(/&#34;/g,'"');
   // console.log(sentimentDetails);
   var sentimentData = JSON.parse(sentimentDetails);
@@ -94,6 +129,7 @@
   var fullCoOrdinateData = JSON.parse(fullCoOrdinate);
   google.charts.load("current", {packages:["annotationchart", "corechart", "bar"]});
       google.charts.setOnLoadCallback(drawChart);
+
       function drawChart() {
         var data = google.visualization.arrayToDataTable(sentimentData);
 
@@ -222,6 +258,9 @@
        }
        $('#WordCloud').jQCloud(topWordsArray);
       }
+      //////////////////////////////////
+
 </script>
+
 </body>
 </html>

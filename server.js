@@ -41,12 +41,20 @@ app.get('/', function(req, res) {
     }).then(function (resp) {
         // co ordinate parse
         var fullCoOrdinate = [];
-        console.log(resp.hits);
-        var hits = resp.hits;
-        for(var i=0; i < hits.length;i++){
-          var indCoOrdinate = hits[i].fields.coordinates.coordinates;
+        // console.log(resp.hits.hits);
+        var values = resp.hits.hits;
+        console.log(values.length);
+        for(var i=0; i < values.length;i++){
+          var fields = values[i].fields;
+          var c = Object.keys(fields)[0];
+          var indCoOrdinate = fields[c];
+          // console.log(val);
+          // console.log(c);
+          // var indCoOrdinate = fields.c;
+          // console.log(fields.c);
           fullCoOrdinate.push(indCoOrdinate);
         }
+        // console.log(fullCoOrdinate);
         //aggs search
         client.search({
             index: 'project_1',
