@@ -7,6 +7,9 @@ var app = express();
 var client = new elasticsearch.Client({
   host: 'http://55be81dc.ngrok.io/'
 });
+var client1 = new elasticsearch.Client({
+  host: 'http://55be81dc.ngrok.io/'
+});
 app.set('views', './views');
 app.engine('html', ejs.renderFile);
 app.use(express.static('./js'));
@@ -21,90 +24,117 @@ app.get('/', function(req, res) {
     var neutralValue;
     var negativeValue;
     var positiveValue;
-      client.search({
-          index: 'project_1',
-          type: 'tweet',
-          body: {
-            size: 0,
-            query: {
-              match_all: {}
-            },
-            "aggregations":
-            {
-                "aggs": {
-                    "terms": {
-                      "field": "sentiments"
-                    }
-                },
-                "aggs2": {
-                    "terms": {
-                      "field": "hashtags",
-                      "size" : 10
-                    }
-                },
-                "aggs3": {
-                    "terms": {
-                      "field": "mentions",
-                      "size" : 10
-                    }
-                },
-                "aggs4": {
-                        "date_histogram" : {
-                            "field" : "timestamp_ms",
-                            "interval" : "day"
-                        }
-                },
-                "aggs5": {
-                   "terms": {
-                     "field": "screen_name",
-                     "size" : 10
-                   }
-               },
-               "aggs6": {
-                   "terms": {
-                     "field": "text",
-                     "exclude":["a","an","the","this","on","at", "and","are","is","to","these","from","of", "for","in","we","that","be","have","it","with","will","they","what","by","if","why","as","has","but"],
-                     "size" : 100
-                   }
-               }
+      client1.search({
+        index: 'project_1',
+        type: 'tweet',
+        body: {
+          fields:["coordinates.coordinates"],
+          size: 200,
+          query: {
+            "constant_score": {
+              "filter":{
+                "exists":{"field" :"coordinates"}
+              }
             }
           }
-      }).then(function (resp) {
-          // console.log(resp);
-          neutralValue = resp.aggregations.aggs.buckets[0].doc_count;
-          negativeValue = resp.aggregations.aggs.buckets[2].doc_count;
-          positiveValue = resp.aggregations.aggs.buckets[1].doc_count;
-          // console.log(neutralValue);
-          // console.log(negativeValue);
-          // console.log(positiveValue);
-          /////////////////////////Top////////////////////////////////
-          var hashtagArray = resp.aggregations.aggs2.buckets;
-          var mentionsArray = resp.aggregations.aggs3.buckets;
-          var dailyDistributionbucket = resp.aggregations.aggs4.buckets;
-          var topUser = resp.aggregations.aggs5.buckets;
-          var topWords = resp.aggregations.aggs6.buckets;
-          /////////////////////////////////////////////////////////
+      }
+    }).then(function (resp) {
+        // co ordinate parse
+        var fullCoOrdinate = [];
+        console.log(resp.hits);
+        var hits = resp.hits;
+        for(var i=0; i < hits.length;i++){
+          var indCoOrdinate = hits[i].fields.coordinates.coordinates;
+          fullCoOrdinate.push(indCoOrdinate);
+        }
+        //aggs search
+        client.search({
+            index: 'project_1',
+            type: 'tweet',
+            body: {
+              size: 0,
+              query: {
+                match_all: {}
+              },
+              "aggregations":
+              {
+                  "aggs": {
+                      "terms": {
+                        "field": "sentiments"
+                      }
+                  },
+                  "aggs2": {
+                      "terms": {
+                        "field": "hashtags",
+                        "size" : 10
+                      }
+                  },
+                  "aggs3": {
+                      "terms": {
+                        "field": "mentions",
+                        "size" : 10
+                      }
+                  },
+                  "aggs4": {
+                          "date_histogram" : {
+                              "field" : "timestamp_ms",
+                              "interval" : "day"
+                          }
+                  },
+                  "aggs5": {
+                     "terms": {
+                       "field": "screen_name",
+                       "size" : 10
+                     }
+                 },
+                 "aggs6": {
+                     "terms": {
+                       "field": "text",
+                       "exclude":["a","an","the","this","on","at", "and","are","is","to","these","from","of", "for","in","we","that","be","have","it","with","will","they","what","by","if","why","as","has","but"],
+                       "size" : 100
+                     }
+                 }
+              }
+            }
+        }).then(function (resp) {
+            // console.log(resp);
+            neutralValue = resp.aggregations.aggs.buckets[0].doc_count;
+            negativeValue = resp.aggregations.aggs.buckets[2].doc_count;
+            positiveValue = resp.aggregations.aggs.buckets[1].doc_count;
+            // console.log(neutralValue);
+            // console.log(negativeValue);
+            // console.log(positiveValue);
+            /////////////////////////Top////////////////////////////////
+            var hashtagArray = resp.aggregations.aggs2.buckets;
+            var mentionsArray = resp.aggregations.aggs3.buckets;
+            var dailyDistributionbucket = resp.aggregations.aggs4.buckets;
+            var topUser = resp.aggregations.aggs5.buckets;
+            var topWords = resp.aggregations.aggs6.buckets;
+            /////////////////////////////////////////////////////////
 
-          var sentimentDataArray = [];
-          var title = ["sentiment", "value"];
-          sentimentDataArray.push(title);
-          var positiveObj = ["Positive", positiveValue];
-          sentimentDataArray.push(positiveObj);
-          var neutralObj = ["Neutral", neutralValue];
-          sentimentDataArray.push(neutralObj);
-          var negativeObj = ["Negative", negativeValue];
-          sentimentDataArray.push(negativeObj);
-          app.render('index.html', {
-            sentimentData: JSON.stringify(sentimentDataArray),
-            hashtags: JSON.stringify(hashtagArray),
-            mentions : JSON.stringify(mentionsArray),
-            dailyDistribution : JSON.stringify(dailyDistributionbucket),
-            topUser: JSON.stringify(topUser),
-            topWords: JSON.stringify(topWords)
-          },function(err, renderedData) {
-             res.send(renderedData);
-         });
-          }, function (err) {
-              console.trace(err.message);
+            var sentimentDataArray = [];
+            var title = ["sentiment", "value"];
+            sentimentDataArray.push(title);
+            var positiveObj = ["Positive", positiveValue];
+            sentimentDataArray.push(positiveObj);
+            var neutralObj = ["Neutral", neutralValue];
+            sentimentDataArray.push(neutralObj);
+            var negativeObj = ["Negative", negativeValue];
+            sentimentDataArray.push(negativeObj);
+            app.render('index.html', {
+              sentimentData: JSON.stringify(sentimentDataArray),
+              hashtags: JSON.stringify(hashtagArray),
+              mentions : JSON.stringify(mentionsArray),
+              dailyDistribution : JSON.stringify(dailyDistributionbucket),
+              topUser: JSON.stringify(topUser),
+              topWords: JSON.stringify(topWords),
+              fullCoOrdinate : JSON.stringify(fullCoOrdinate)
+            },function(err, renderedData) {
+               res.send(renderedData);
+           });
+            }, function (err) {
+                console.trace(err.message);
+        });
       });
+
 });
