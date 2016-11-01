@@ -53,7 +53,20 @@ app.get('/', function(req, res) {
                             "field" : "timestamp_ms",
                             "interval" : "day"
                         }
-                }
+                },
+                "aggs5": {
+                   "terms": {
+                     "field": "screen_name",
+                     "size" : 10
+                   }
+               },
+               "aggs6": {
+                   "terms": {
+                     "field": "text",
+                     "exclude":["a","an","the","this","on","at", "and","are","is","to","these","from","of", "for","in","we","that","be","have","it","with","will","they","what","by","if","why","as","has","but"],
+                     "size" : 100
+                   }
+               }
             }
           }
       }).then(function (resp) {
@@ -68,7 +81,10 @@ app.get('/', function(req, res) {
           var hashtagArray = resp.aggregations.aggs2.buckets;
           var mentionsArray = resp.aggregations.aggs3.buckets;
           var dailyDistributionbucket = resp.aggregations.aggs4.buckets;
+          var topUser = resp.aggregations.aggs5.buckets;
+          var topWords = resp.aggregations.aggs6.buckets;
           /////////////////////////////////////////////////////////
+
           var sentimentDataArray = [];
           var title = ["sentiment", "value"];
           sentimentDataArray.push(title);
@@ -82,7 +98,9 @@ app.get('/', function(req, res) {
             sentimentData: JSON.stringify(sentimentDataArray),
             hashtags: JSON.stringify(hashtagArray),
             mentions : JSON.stringify(mentionsArray),
-            dailyDistribution : JSON.stringify(dailyDistributionbucket)
+            dailyDistribution : JSON.stringify(dailyDistributionbucket),
+            topUser: JSON.stringify(topUser),
+            topWords: JSON.stringify(topWords)
           },function(err, renderedData) {
              res.send(renderedData);
          });

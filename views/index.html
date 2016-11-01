@@ -5,6 +5,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqcloud/1.0.4/jqcloud.css">
+
 
 </head>
 <body>
@@ -45,10 +49,26 @@
         </div>
         </div>
     </div>
+    <br>
+    <br>
+    <div class="row">
+      <div class="col-sm-5">
+      <div id="topUser" style="height: 500px; background-color : #A3C7C9"></div>
+      </div>
+      <div>
+      <div class="col-sm-2">
+        </div>
+      <div class="col-sm-5">
+        <div> <strong>Frequently used Words</strong></div><br/><br/>
+        <div id="WordCloud" style="height: 500px; background-color :white"></div>
+      </div>
+      </div>
+    </div>
   </div>
        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/jqcloud/1.0.4/jqcloud-1.0.4.js"></script>
 <script>
   var sentimentDetails = "<%=sentimentData%>".replace(/&#34;/g,'"');
   // console.log(sentimentDetails);
@@ -63,6 +83,12 @@
   var dailyTweets = "<%=dailyDistribution%>".replace(/&#34;/g,'"');
   var dailyTweetsData = JSON.parse(dailyTweets);
   //
+  var topUser = "<%=topUser%>".replace(/&#34;/g,'"');
+  var topUserData = JSON.parse(topUser);
+
+  var topWord = "<%=topWords%>".replace(/&#34;/g,'"');
+  var topWordsData = JSON.parse(topWord);
+
   google.charts.load("current", {packages:["annotationchart", "corechart", "bar"]});
       google.charts.setOnLoadCallback(drawChart);
       function drawChart() {
@@ -158,7 +184,41 @@
         };
 
         tweetschart.draw(dailyTweetsdata, chartoptions);
+        //////////////////////////////////////////////////////
+        var topUserArray = [["Top Users", "Count"]];
+        for(var i=0; i< topUserData.length; i++){
+          var newAr = [];
+          newAr.push(topUserData[i].key);
+          newAr.push(topUserData[i].doc_count);
+          topUserArray.push(newAr);
+        }
+        var topUserTag = new google.visualization.arrayToDataTable(topUserArray);
 
+       var topUserOptions = {
+         title: 'Top 10 Users',
+         width: 900,
+         legend: { position: 'none' },
+         chart: { subtitle: 'popularity by retweets' },
+         axes: {
+           x: {
+             0: { side: 'top', label: 'Users'} // Top x-axis.
+           }
+         },
+         bar: { groupWidth: "90%" }
+       };
+
+       var userchart = new google.charts.Bar(document.getElementById('topUser'));
+       userchart.draw(topUserTag, google.charts.Bar.convertOptions(topUserOptions));
+
+       //////////////////////////////////////////////////////
+       var topWordsArray = [];
+       for(var i=0; i< topWordsData.length; i++){
+         var words = new Object();
+         words.text = topWordsData[i].key;
+         words.weight= topWordsData[i].doc_count;
+         topWordsArray.push(words);
+       }
+       $('#WordCloud').jQCloud(topWordsArray);
       }
 </script>
 </body>
