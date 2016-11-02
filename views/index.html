@@ -8,8 +8,7 @@
   <link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqcloud/1.0.4/jqcloud.css">
-
-
+    <link href="index.css" rel="stylesheet">
 </head>
 <body>
   <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -65,13 +64,17 @@
       </div>
     </div>
     <br>
+    <br />
     <div class="row">
       <div class="col-sm-5">
+        <div> <strong>Heat Map</strong></div><br/><br/>
         <div id="map" style="height: 500px; background-color :white"></div>
       </div>
       <div class="col-sm-2">
         </div>
       <div class="col-sm-5">
+        <div> <strong>Viral Tweets</strong></div><br/><br/>
+        <div id="tweets" class="scroll" style="height: 500px; background-color :white"></div>
         </div>
     </div>
   </div>
@@ -80,17 +83,9 @@
        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqcloud/1.0.4/jqcloud-1.0.4.js"></script>
 
-<script>
-var map,heatmap;
-function loadMap(){
-  map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 6,
-    center: {lat: -26.191, lng: 28.032},
-    mapTypeId: 'hybrid'
-  });
-}
-</script>
+<script src="index.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyDTlf4PdknQp7TuI8oakozrbDTMCflpBMg&callback=loadMap"></script>
+<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
 <script>
 var coordDetails = "<%=fullCoOrdinate%>".replace(/&#34;/g,'"');
 // console.log(sentimentDetails);
@@ -100,7 +95,7 @@ for(var i=0; i< coordData.length; i++){
   var coOrd = coordData[i];
   heatMapData.push(new google.maps.LatLng(coOrd[1], coOrd[0]));
 }
-console.log(coordDetails);
+// console.log(coordDetails);
 heatmap = new google.maps.visualization.HeatmapLayer({
     data: heatMapData,
     map: map
@@ -127,6 +122,53 @@ heatmap = new google.maps.visualization.HeatmapLayer({
 
   var fullCoOrdinate = "<%=fullCoOrdinate%>".replace(/&#34;/g,'"');
   var fullCoOrdinateData = JSON.parse(fullCoOrdinate);
+
+  var tidList = "<%=tidList%>".replace(/&#34;/g,'"');
+  var tidListData = JSON.parse(tidList);
+
+  window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "http://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+
+  return t;
+  }(document, "script", "container"));
+  document.getElementById('tweets').innerHTML = [];
+
+  for(var i=0; i< tidListData.length; i++){
+    var id = 'container'+i;
+    document.getElementById('tweets').innerHTML += '<div id='+id+'></div>';
+
+  }
+  var count=0;
+  for(var i=0; i< tidListData.length; i++){
+    var id = 'container'+i;
+    var tid  = tidListData[i];
+    twttr.widgets.createTweet(
+      tid,
+      document.getElementById(id),
+      {
+        theme: 'light',
+        width: '1000px'
+      }
+    ).then( function( el ) {
+      // console.log('Tweet added.');
+      count++;
+      if(count == tweets.length)
+        spinner.stop();
+    });
+  }
+
+
   google.charts.load("current", {packages:["annotationchart", "corechart", "bar"]});
       google.charts.setOnLoadCallback(drawChart);
 
