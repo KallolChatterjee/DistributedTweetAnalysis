@@ -46,7 +46,7 @@ app.get('/', function(req, res) {
         var fullCoOrdinate = [];
         // console.log(resp.hits.hits);
         var values = resp.hits.hits;
-        console.log(values.length);
+        // console.log(values.length);
         for(var i=0; i < values.length;i++){
           var fields = values[i].fields;
           var c = Object.keys(fields)[0];
@@ -121,7 +121,7 @@ app.get('/', function(req, res) {
                    "aggs6": {
                        "terms": {
                          "field": "text",
-                         "exclude":["a","an","the","this","on","at", "and","are","is","to","these","from","of", "for","in","we","that","be","have","it","with","will","they","what","by","if","why","as","has","but"],
+                         "exclude":["a","an","the","this","on","at", "and","are","is","to","these","from","of", "for","in","we","that","be","have","it","with","will","they","what","by","if","why","as","has","but","rt"],
                          "size" : 100
                        }
                    }

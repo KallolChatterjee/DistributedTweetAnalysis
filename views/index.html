@@ -40,8 +40,7 @@
         <div id="topUserMentions" style="height: 500px; background-color : #A3C7C9"></div>
         </div>
         <div>
-        <div class="col-sm-2">
-          </div>
+
         <div class="col-sm-5">
           <div> <strong>Daily Tweets Distribution</strong></div><br/><br/>
           <div id='dailyTweetschart' style='height: 450px; margin-left : 20px;'></div>
@@ -55,8 +54,7 @@
       <div id="topUser" style="height: 500px; background-color : #A3C7C9"></div>
       </div>
       <div>
-      <div class="col-sm-2">
-        </div>
+
       <div class="col-sm-5">
         <div> <strong>Frequently used Words</strong></div><br/><br/>
         <div id="WordCloud" style="height: 500px; background-color :white"></div>
@@ -70,8 +68,7 @@
         <div> <strong>Heat Map</strong></div><br/><br/>
         <div id="map" style="height: 500px; background-color :white"></div>
       </div>
-      <div class="col-sm-2">
-        </div>
+
       <div class="col-sm-5">
         <div> <strong>Viral Tweets</strong></div><br/><br/>
         <div id="tweets" class="scroll" style="height: 500px; background-color :white"></div>
@@ -197,7 +194,6 @@ heatmap = new google.maps.visualization.HeatmapLayer({
 
        var tophashTagoptions = {
          title: 'Top 10 Hash Tag',
-         width: 900,
          legend: { position: 'none' },
          chart: { subtitle: 'popularity by retweet' },
          axes: {
@@ -222,7 +218,6 @@ heatmap = new google.maps.visualization.HeatmapLayer({
 
        var mentionsoptions = {
          title: 'Top 10 user mention',
-         width: 900,
          legend: { position: 'none' },
          chart: { title: 'Top 10 user mention',
                   subtitle: 'popularity by retweet' },
@@ -276,7 +271,6 @@ heatmap = new google.maps.visualization.HeatmapLayer({
 
        var topUserOptions = {
          title: 'Top 10 Users',
-         width: 900,
          legend: { position: 'none' },
          chart: { subtitle: 'popularity by retweets' },
          axes: {
